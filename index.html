@@ -122,6 +122,8 @@
       object-fit: fill;
       pointer-events: none;
       z-index: 2;
+      /* Branco (255,255,255) × cor do vídeo = cor do vídeo → área branca some */
+      mix-blend-mode: multiply;
     }
 
     /* Permission placeholder */
@@ -503,16 +505,20 @@
     }
     ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
 
-    /* Draw frame overlay */
+    /* Draw frame overlay with multiply: white area vanishes, colored borders stay */
     try {
       const img = new Image();
       img.crossOrigin = 'anonymous';
-      img.src = overlay.src + '?t=' + Date.now(); // bust cache for CORS
+      img.src = overlay.src;
       await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+      ctx.globalCompositeOperation = 'multiply';
       ctx.drawImage(img, 0, 0, cw, ch);
+      ctx.globalCompositeOperation = 'source-over'; // reset
     } catch (e) {
-      /* fallback: draw the already-loaded overlay element */
+      /* fallback sem CORS */
+      ctx.globalCompositeOperation = 'multiply';
       ctx.drawImage(overlay, 0, 0, cw, ch);
+      ctx.globalCompositeOperation = 'source-over';
     }
 
     /* Show result */
