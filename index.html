@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Tire uma foto especial com a moldura de Bruna & Diego e guarde esse momento único!" />
+  <meta name="theme-color" content="#e8758a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>📸 Foto com Moldura – Bruna &amp; Diego</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --rose:   #e8758a;
+      --rose-lt:#f9d0da;
+      --rose-dk:#b85068;
+      --cream:  #fdf6f0;
+      --shadow: 0 8px 32px rgba(184,80,104,.18);
+      --radius: 20px;
+    }
+
+    html, body {
+      min-height: 100%;
+      font-family: 'Lato', sans-serif;
+      background: linear-gradient(135deg, #fde8ee 0%, #fdf6f0 50%, #e8f0e8 100%);
+      color: #4a2c35;
+      overscroll-behavior: none;
+    }
+
+    /* ── HEADER ── */
+    header {
+      text-align: center;
+      padding: 28px 20px 10px;
+    }
+    .petals { font-size: 1.5rem; line-height: 1.6; }
+    .petal  { display: inline-block; animation: sway 3s ease-in-out infinite; }
+    .petal:nth-child(2) { animation-delay: .4s; }
+    .petal:nth-child(3) { animation-delay: .8s; }
+
+    @keyframes sway {
+      0%,100% { transform: rotate(-8deg); }
+      50%      { transform: rotate(8deg); }
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.4rem, 5.5vw, 2.1rem);
+      color: var(--rose-dk);
+      letter-spacing: .04em;
+      margin: 6px 0 2px;
+    }
+    header p { font-size: .85rem; color: #a07880; margin-bottom: 4px; }
+
+    /* ── FRAME TABS ── */
+    .frame-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 16px;
+    }
+    .frame-tab {
+      flex: 1;
+      max-width: 165px;
+      padding: 10px 14px;
+      border: 2px solid var(--rose-lt);
+      border-radius: 50px;
+      background: white;
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--rose-dk);
+      transition: all .22s ease;
+      text-align: center;
+    }
+    .frame-tab.active,
+    .frame-tab:hover {
+      background: var(--rose);
+      border-color: var(--rose);
+      color: white;
+      box-shadow: 0 4px 14px rgba(232,117,138,.4);
+      transform: translateY(-2px);
+    }
+
+    /* ── VIEWFINDER ── */
+    .camera-wrapper {
+      display: flex;
+      justify-content: center;
+      padding: 0 12px 6px;
+    }
+
+    .viewfinder {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      background: #1a0a10;
+      transition: aspect-ratio .3s ease;
+    }
+    .viewfinder.landscape { aspect-ratio: 4/3; }
+    .viewfinder.portrait  { aspect-ratio: 9/16; max-width: 300px; }
+
+    #video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    #frameOverlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Permission placeholder */
+    #placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: white;
+      font-size: .9rem;
+      text-align: center;
+      padding: 24px;
+      z-index: 4;
+      background: rgba(26,10,16,.88);
+    }
+    #placeholder .big-icon { font-size: 3rem; animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+
+    #canvas { display: none; }
+
+    /* ── TIP ── */
+    .tip {
+      text-align: center;
+      font-size: .78rem;
+      color: #b08090;
+      padding: 4px 20px;
+      min-height: 1.4em;
+    }
+
+    /* ── CONTROLS ── */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding: 14px 20px 8px;
+    }
+
+    .btn-shutter {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      border: 4px solid white;
+      background: linear-gradient(135deg, var(--rose), var(--rose-dk));
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(232,117,138,.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.9rem;
+      transition: transform .14s, box-shadow .14s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .btn-shutter:active  { transform: scale(.88); }
+    .btn-shutter:disabled{ opacity: .38; cursor: not-allowed; }
+
+    .btn-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      font-size: 1.3rem;
+      box-shadow: 0 3px 12px rgba(0,0,0,.12);
+      transition: transform .18s, background .18s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .btn-icon:hover  { background: var(--rose-lt); }
+    .btn-icon:active { transform: scale(.88); }
+
+    /* ── MODAL ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,10,16,.78);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+    .modal {
+      background: var(--cream);
+      border-radius: var(--radius);
+      overflow: hidden;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      animation: slideUp .32s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes slideUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+    .modal-header {
+      background: linear-gradient(135deg, #fde8ee, #fce0e8);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--rose-lt);
+    }
+    .modal-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--rose-dk);
+    }
+    .btn-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--rose-dk);
+      line-height: 1;
+      padding: 4px 6px;
+      border-radius: 8px;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .modal-body { padding: 16px 16px 4px; }
+    #resultImg {
+      width: 100%;
+      border-radius: 12px;
+      display: block;
+      box-shadow: 0 4px 20px rgba(0,0,0,.12);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      padding: 14px 16px 20px;
+    }
+    .btn-action {
+      flex: 1;
+      padding: 14px 10px;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-weight: 700;
+      font-size: .88rem;
+      transition: transform .14s, box-shadow .14s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--rose), var(--rose-dk));
+      color: white;
+      box-shadow: 0 4px 16px rgba(232,117,138,.4);
+    }
+    .btn-primary:hover  { transform: translateY(-2px); }
+    .btn-primary:active { transform: scale(.96); }
+    .btn-secondary {
+      background: white;
+      color: var(--rose-dk);
+      border: 2px solid var(--rose-lt);
+    }
+    .btn-secondary:hover { background: var(--rose-lt); }
+
+    /* ── FLASH ── */
+    .flash {
+      position: fixed;
+      inset: 0;
+      background: white;
+      z-index: 200;
+      pointer-events: none;
+      animation: flashAnim .45s ease forwards;
+    }
+    @keyframes flashAnim {
+      0%  { opacity: 0; }
+      15% { opacity: 1; }
+      100%{ opacity: 0; }
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 14px 20px 36px;
+      font-size: .75rem;
+      color: #c0a0a8;
+    }
+    footer .heart { color: var(--rose); }
+
+    /* ── RESPONSIVE ── */
+    @media (min-width: 600px) {
+      .viewfinder { max-width: 520px; }
+      .viewfinder.portrait { max-width: 320px; }
+    }
+    @media (max-width: 350px) {
+      .btn-shutter { width: 62px; height: 62px; font-size: 1.55rem; }
+      .btn-icon    { width: 44px; height: 44px; font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="petals">
+    <span class="petal">🌸</span>
+    <span class="petal">🌹</span>
+    <span class="petal">🌸</span>
+  </div>
+  <h1>Bruna &amp; Diego</h1>
+  <p>Tire uma foto linda e leve essa lembrança! 💕</p>
+</header>
+
+<!-- FRAME SELECTOR -->
+<div class="frame-tabs" role="group" aria-label="Escolha a moldura">
+  <button class="frame-tab active" id="tabLandscape" onclick="selectFrame('landscape')">🖼️ Foto (4:3)</button>
+  <button class="frame-tab"        id="tabPortrait"  onclick="selectFrame('portrait')">📱 Stories (9:16)</button>
+</div>
+
+<!-- CAMERA VIEWFINDER -->
+<div class="camera-wrapper">
+  <div class="viewfinder landscape" id="viewfinder">
+    <video id="video" autoplay playsinline muted></video>
+    <img   id="frameOverlay" src="moldura.png" alt="Moldura decorativa" />
+    <canvas id="canvas"></canvas>
+
+    <div id="placeholder">
+      <div class="big-icon">📷</div>
+      <strong>Câmera necessária</strong>
+      <p style="font-size:.78rem;opacity:.8;margin-top:4px">
+        Permita o acesso à câmera para tirar sua foto com a moldura.
+      </p>
+    </div>
+  </div>
+</div>
+
+<p class="tip" id="tipText">Escolha a moldura e toque em 📷 para tirar a foto!</p>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <button class="btn-icon" id="btnFlip" title="Virar câmera" aria-label="Virar câmera" onclick="flipCamera()">🔄</button>
+  <button class="btn-shutter" id="btnShutter" title="Tirar foto" aria-label="Tirar foto" onclick="capture()">📷</button>
+  <div style="width:50px"></div>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-label="Foto capturada">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>💕 Foto pronta!</h2>
+      <button class="btn-close" onclick="closeModal()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body">
+      <img id="resultImg" src="" alt="Sua foto com a moldura Bruna e Diego" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn-action btn-primary"   id="btnDownload" onclick="downloadPhoto()">⬇️ Salvar foto</button>
+      <button class="btn-action btn-secondary" id="btnRetry"    onclick="closeModal()">📷 Nova foto</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  Feito com <span class="heart">♥</span> para Bruna &amp; Diego · 2025
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── elements ── */
+  const video       = document.getElementById('video');
+  const canvas      = document.getElementById('canvas');
+  const overlay     = document.getElementById('frameOverlay');
+  const placeholder = document.getElementById('placeholder');
+  const viewfinder  = document.getElementById('viewfinder');
+  const modal       = document.getElementById('modal');
+  const resultImg   = document.getElementById('resultImg');
+  const btnShutter  = document.getElementById('btnShutter');
+  const tipText     = document.getElementById('tipText');
+
+  /* ── state ── */
+  let stream       = null;
+  let facingMode   = 'user';
+  let currentFrame = 'landscape';
+  let capturedBlob = null;
+  let camReady     = false;
+
+  /* ── frame selection ── */
+  window.selectFrame = function (type) {
+    currentFrame = type;
+    document.getElementById('tabLandscape').classList.toggle('active', type === 'landscape');
+    document.getElementById('tabPortrait') .classList.toggle('active', type === 'portrait');
+    viewfinder.classList.toggle('landscape', type === 'landscape');
+    viewfinder.classList.toggle('portrait',  type === 'portrait');
+    overlay.src = type === 'landscape' ? 'moldura.png' : 'Moldura_Stories.png';
+    startCamera();
+  };
+
+  /* ── start camera ── */
+  async function startCamera() {
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    camReady = false;
+    btnShutter.disabled = true;
+
+    const isLandscape = currentFrame === 'landscape';
+    const constraints = {
+      video: {
+        facingMode,
+        width:  { ideal: isLandscape ? 1920 : 1080 },
+        height: { ideal: isLandscape ? 1440 : 1920 },
+      },
+      audio: false
+    };
+
+    try {
+      stream = await navigator.mediaDevices.getUserMedia(constraints);
+      video.srcObject = stream;
+      await video.play();
+      placeholder.style.display = 'none';
+      btnShutter.disabled = false;
+      camReady = true;
+      tipText.textContent = 'Posicione-se e toque em 📷 para capturar!';
+    } catch (err) {
+      placeholder.style.display = 'flex';
+      const msg = err.name === 'NotAllowedError'
+        ? 'Permissão negada. Vá em Configurações > Câmera do navegador e permita o acesso.'
+        : 'Câmera indisponível. Use Chrome ou Safari atualizado.';
+      placeholder.innerHTML = `
+        <div class="big-icon">⚠️</div>
+        <strong>Câmera bloqueada</strong>
+        <p style="font-size:.78rem;opacity:.8;margin-top:6px">${msg}</p>`;
+    }
+  }
+
+  /* ── flip camera ── */
+  window.flipCamera = function () {
+    facingMode = facingMode === 'user' ? 'environment' : 'user';
+    startCamera();
+  };
+
+  /* ── capture ── */
+  window.capture = async function () {
+    if (!camReady) { startCamera(); return; }
+
+    /* Flash */
+    const fl = document.createElement('div');
+    fl.className = 'flash';
+    document.body.appendChild(fl);
+    setTimeout(() => fl.remove(), 500);
+
+    /* Canvas resolution */
+    const isLandscape = currentFrame === 'landscape';
+    const cw = isLandscape ? 1400 : 1080;
+    const ch = isLandscape ? 1050 : 1920;
+    canvas.width  = cw;
+    canvas.height = ch;
+
+    const ctx = canvas.getContext('2d');
+
+    /* Draw video (cover) */
+    const vw = video.videoWidth, vh = video.videoHeight;
+    const vr = vw / vh, cr = cw / ch;
+    let sx, sy, sw, sh;
+    if (vr > cr) {
+      sh = vh; sw = sh * cr;
+      sx = (vw - sw) / 2; sy = 0;
+    } else {
+      sw = vw; sh = sw / cr;
+      sx = 0; sy = (vh - sh) / 2;
+    }
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
+
+    /* Draw frame overlay */
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = overlay.src + '?t=' + Date.now(); // bust cache for CORS
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; });
+      ctx.drawImage(img, 0, 0, cw, ch);
+    } catch (e) {
+      /* fallback: draw the already-loaded overlay element */
+      ctx.drawImage(overlay, 0, 0, cw, ch);
+    }
+
+    /* Show result */
+    canvas.toBlob(blob => {
+      capturedBlob = blob;
+      const url = URL.createObjectURL(blob);
+      resultImg.src = url;
+      modal.classList.add('open');
+    }, 'image/jpeg', 0.93);
+  };
+
+  /* ── download ── */
+  window.downloadPhoto = function () {
+    if (!capturedBlob) return;
+    const a = document.createElement('a');
+    a.href     = URL.createObjectURL(capturedBlob);
+    a.download = 'BrunaDiego_' + Date.now() + '.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  /* ── close modal ── */
+  window.closeModal = function () {
+    modal.classList.remove('open');
+    if (resultImg.src.startsWith('blob:')) URL.revokeObjectURL(resultImg.src);
+    resultImg.src = '';
+  };
+
+  /* close on backdrop click */
+  modal.addEventListener('click', e => { if (e.target === modal) window.closeModal(); });
+
+  /* ── init ── */
+  startCamera();
+})();
+</script>
+</body>
+</html>
